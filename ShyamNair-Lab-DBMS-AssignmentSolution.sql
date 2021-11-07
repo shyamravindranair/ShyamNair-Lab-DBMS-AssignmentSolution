@@ -44,7 +44,7 @@ create table ProductDetails
     foreign key (SUPP_ID) references Supplier(SUPP_ID)
 );
 
-create table Orders
+create table `Order`
 (
 	ORD_ID int primary key not null,
     ORD_AMOUNT float,
@@ -101,7 +101,7 @@ insert into ProductDetails values
 (4, 2, 3, 2500),
 (5, 4, 1, 1000);
 
-insert into Orders values
+insert into `Order` values
 (20, 1500, '2021-10-12', 3, 5),
 (25, 30500, '2021-09-16', 5, 2),
 (26, 2000, '2021-10-05', 1, 1),
@@ -117,19 +117,17 @@ insert into Rating values
 
 /* 3) Display the number of the customer group by their genders who have placed any order of amount greater than or equal to Rs.3000.*/
 select c.CUS_GENDER as Gender, count(o.CUS_ID) as NoOfCustomers 
-from Customer c, Orders o 
+from Customer c, `Order` o 
 where c.CUS_ID = o.CUS_ID and o.ORD_AMOUNT >= 3000 
 group by c.CUS_GENDER; 
 
 /* 4)  Display all the orders along with the product name ordered by a customer having Customer_Id=2. */
 select o.*, p.PRO_NAME
-from Orders o inner join ProductDetails pd
+from `Order` o inner join ProductDetails pd
 on o.PROD_ID = pd.PROD_ID
 inner join Product p
 on pd.PRO_ID = p.PRO_ID
 where o.CUS_ID = 2;
-
-SET sql_mode = '';
 
 /* 5) Display the Supplier details who can supply more than one product. */
 select s.*
@@ -142,13 +140,14 @@ having count(pd.SUPP_ID) > 1;
 select c.CAT_NAME, o.ORD_AMOUNT from Category c
 inner join Product p on p.CAT_ID = c.CAT_ID
 inner join ProductDetails pd on pd.PRO_ID = p.PRO_ID
-inner join Orders o on o.PROD_ID = pd.PROD_ID
+inner join `Order` o on o.PROD_ID = pd.PROD_ID
 having min(o.ORD_AMOUNT);
 
 /* 7) Display the Id and Name of the Product ordered after “2021-10-05” */
-select p.PRO_ID, p.PRO_NAME from Product p
+select p.PRO_ID, p.PRO_NAME
+from Product p
 inner join ProductDetails pd on pd.PRO_ID = p.PRO_ID
-inner join Orders o on o.PROD_ID = pd.PROD_ID
+inner join `Order` o on o.PROD_ID = pd.PROD_ID
 where o.ORD_DATE > "2021-10-05"
 order by p.PRO_ID;
 
@@ -167,12 +166,15 @@ or CUS_NAME like 'a%'
 order by CUS_NAME;
 
 /* 10) Display the total order amount of the male customers. */
-select sum(o.ORD_AMOUNT) as 'total order amount' from Orders o
+select sum(o.ORD_AMOUNT) as 'total order amount'
+from `Order` o
 inner join Customer c on c.CUS_ID = o.CUS_ID
 where c.CUS_GENDER = 'M';
 
 /* 11) Display all the Customers left outer join with the orders. */
-select * from Customer c  left outer join Orders o on c.CUS_ID = o.CUS_ID; 
+select * 
+from Customer c 
+left outer join `Order` o on c.CUS_ID = o.CUS_ID; 
 
 /* 12) Create a stored procedure to display the Rating for a Supplier if any along with the 
 Verdict on that rating if any like if rating >4 then “Genuine Supplier” if rating >2 “Average Supplier” else “Supplier should not be considered”.*/
@@ -190,7 +192,7 @@ then 'Average Supplier'
 else 'Supplier should not be considered'
 end as verdict
 
-from supplier s inner join rating r
+from Supplier s inner join Rating r
 on r.SUPP_ID = s.SUPP_ID;
 end &&
 
